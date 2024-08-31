@@ -1,0 +1,5 @@
+rootProject.name = 'VOICEPEAKCommandLineWrapper4J'
+include 'voicepeakcw4j'
+include 'voicepeakcw4j-mock'
+include 'voicepeakcw4j-speech'
+

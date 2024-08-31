@@ -1,0 +1,84 @@
+plugins {
+    id 'maven-publish'
+}
+
+subprojects {
+    apply plugin: 'java-library'
+
+    group = 'com.github.k7t3'
+    version = voicepeakcw4jVersion
+
+    repositories {
+        mavenCentral()
+    }
+
+    plugins.withType(JavaBasePlugin).configureEach {
+        java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(javaVersion)
+            }
+
+            withJavadocJar()
+            withSourcesJar()
+        }
+
+        compileJava {
+            options.encoding = 'UTF-8'
+        }
+
+        javadoc {
+            options.encoding = 'UTF-8'
+            options.windowTitle("$project.name")
+            options.addBooleanOption('html5', true)
+        }
+    }
+
+    plugins.withType(MavenPublishPlugin).configureEach {
+
+        publishing {
+            publications {
+                maven(MavenPublication) {
+                    groupId = 'com.github.k7t3'
+                    artifactId = "$project.name"
+                    version = voicepeakcw4jVersion
+
+                    pom {
+                        licenses {
+                            license {
+                                name = 'The Apache License, Version 2.0'
+                                url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            }
+                        }
+                        developers {
+                            developer {
+                                id = 'k7t3'
+                                name = 'k7t3'
+                                email = 'k7t3annnn@gmail.com'
+                            }
+                        }
+                        scm {
+                            connection = 'scm:git:https://github.com/k7t3/XXX'
+                            developerConnection = 'scm:git:git@github.com:k7t3/XXX.git'
+                            url = 'https://github.com/k7t3/XXX'
+                        }
+                    }
+
+                    from components.java
+                }
+            }
+
+            repositories {
+                maven {
+                    def releasesRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/releases/'
+                    def snapshotsRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+                    url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+
+                    credentials {
+                        username = System.getenv("maven.username")
+                        password = System.getenv("maven.password")
+                    }
+                }
+            }
+        }
+    }
+}

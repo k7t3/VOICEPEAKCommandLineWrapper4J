@@ -1,0 +1,35 @@
+plugins {
+    id 'application'
+    id "com.github.johnrengelman.shadow" version "8.1.1"
+}
+
+application {
+    mainClass = 'com.github.k7t3.voicepeakcw4j.VoicePeak'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'commons-cli:commons-cli:1.9.0'
+
+    testImplementation platform("org.junit:junit-bom:$junitVersion")
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+java {
+    modularity.inferModulePath = true
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.register('buildMock', Copy) {
+    dependsOn shadowJar
+
+    from 'build/libs'
+    into 'testLib'
+    include '**-all.jar'
+}

@@ -1,0 +1,26 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(":voicepeakcw4j")
+
+    testImplementation platform("org.junit:junit-bom:$junitVersion")
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    testImplementation 'org.slf4j:slf4j-jdk-platform-logging:2.0.16'
+    testImplementation 'ch.qos.logback:logback-classic:1.5.7'
+}
+
+java {
+    modularity.inferModulePath = true
+}
+
+test {
+    useJUnitPlatform()
+}
