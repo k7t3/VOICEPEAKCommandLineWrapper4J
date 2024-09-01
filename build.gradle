@@ -57,9 +57,9 @@ subprojects {
                             }
                         }
                         scm {
-                            connection = 'scm:git:https://github.com/k7t3/XXX'
-                            developerConnection = 'scm:git:git@github.com:k7t3/XXX.git'
-                            url = 'https://github.com/k7t3/XXX'
+                            connection = 'scm:git:https://github.com/k7t3/VOICEPEAKCommandLineWrapper4J'
+                            developerConnection = 'scm:git:git@github.com:k7t3/VOICEPEAKCommandLineWrapper4J.git'
+                            url = 'https://github.com/k7t3/VOICEPEAKCommandLineWrapper4J'
                         }
                     }
 
@@ -74,8 +74,8 @@ subprojects {
                     url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
 
                     credentials {
-                        username = System.getenv("maven.username")
-                        password = System.getenv("maven.password")
+                        username = System.getenv("MAVEN_USERNAME")
+                        password = System.getenv("MAVEN_PASSWORD")
                     }
                 }
             }
