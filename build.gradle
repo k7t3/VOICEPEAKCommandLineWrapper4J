@@ -5,7 +5,7 @@ plugins {
 subprojects {
     apply plugin: 'java-library'
 
-    group = 'com.github.k7t3'
+    group = 'io.github.k7t3'
     version = voicepeakcw4jVersion
 
     repositories {
@@ -38,9 +38,7 @@ subprojects {
         publishing {
             publications {
                 maven(MavenPublication) {
-                    groupId = 'com.github.k7t3'
                     artifactId = "$project.name"
-                    version = voicepeakcw4jVersion
 
                     pom {
                         licenses {
@@ -69,7 +67,7 @@ subprojects {
 
             repositories {
                 maven {
-                    def releasesRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/releases/'
+                    def releasesRepoUrl = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
                     def snapshotsRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
                     url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
 
@@ -79,6 +77,16 @@ subprojects {
                     }
                 }
             }
+        }
+    }
+
+    plugins.withType(SigningPlugin).configureEach {
+        signing {
+            def signingKey = System.getenv("SIGNING_KEY")
+            def signingPassword = System.getenv("SIGNING_PASSWORD")
+            useInMemoryPgpKeys(signingKey, signingPassword)
+            required { gradle.taskGraph.hasTask("publishMavenJavaPublicationToMavenRepository") }
+            sign publishing.publications.mavenJava
         }
     }
 }
