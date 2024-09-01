@@ -34,13 +34,16 @@ subprojects {
     }
 
     plugins.withType(MavenPublishPlugin).configureEach {
-
         publishing {
             publications {
                 maven(MavenPublication) {
                     artifactId = "$project.name"
 
                     pom {
+                        name = "$project.name"
+                        description = 'This library is a command line wrapper for the VOICEPEAK developed by AHS Co.Ltd.'
+                        url = 'https://github.com/k7t3/VOICEPEAKCommandLineWrapper4J'
+
                         licenses {
                             license {
                                 name = 'The Apache License, Version 2.0'
@@ -86,7 +89,8 @@ subprojects {
             def signingPassword = System.getenv("SIGNING_PASSWORD")
             useInMemoryPgpKeys(signingKey, signingPassword)
             required { gradle.taskGraph.hasTask("publishMavenJavaPublicationToMavenRepository") }
-            sign publishing.publications.mavenJava
+            //sign publishing.publications.mavenJava
+            sign publishing.publications
         }
     }
 }

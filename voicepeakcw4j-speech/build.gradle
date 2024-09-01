@@ -1,10 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-}
-
-repositories {
-    mavenCentral()
+    id 'signing'
 }
 
 dependencies {
