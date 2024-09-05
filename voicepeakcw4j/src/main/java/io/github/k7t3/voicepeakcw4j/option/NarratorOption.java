@@ -25,6 +25,10 @@ public class NarratorOption implements Option {
 
     private final String name;
 
+    /**
+     * ナレーターを設定するオプションを生成する
+     * @param name ナレーター名
+     */
     public NarratorOption(String name) {
         this.name = name;
     }

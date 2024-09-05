@@ -39,16 +39,10 @@ jobs:
         shell: bash
         run: |
           mv voicepeakcw4j-speech/build/libs/* asset/
-      - name: Detect asset files
-        shell: bash
-        run: |
-          echo "asset_path=asset/$(ls asset)" >> $GITHUB_ENV
-          echo "asset_name=$(ls asset)" >> $GITHUB_ENV
       - name: Upload artifacts
         uses: actions/upload-artifact@v4 # https://github.com/actions/upload-artifact
         with:
-          name: ${{ env.asset_name }}
-          path: ${{ env.asset_path }}
+          path: asset/**/*
           compression-level: 0
   release:
     runs-on: ubuntu-latest

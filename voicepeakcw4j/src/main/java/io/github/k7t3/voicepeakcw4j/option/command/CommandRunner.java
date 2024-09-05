@@ -33,11 +33,21 @@ public class CommandRunner {
 
     private final Command command;
 
+    /**
+     * コマンドを実行するランナーインスタンスを生成する
+     * @param executable 実行可能ファイル
+     * @param command 実行するコマンド
+     */
     public CommandRunner(VPExecutable executable, Command command) {
         this.executable = executable;
         this.command = command;
     }
 
+    /**
+     * コマンドを実行する。
+     * <p>標準出力の内容を返す</p>
+     * @return 標準出力
+     */
     public List<String> run() {
         var commands = new ArrayList<String>();
         executable.fill(commands);

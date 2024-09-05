@@ -5,7 +5,7 @@ plugins {
 }
 
 dependencies {
-    implementation project(":voicepeakcw4j")
+    api project(":voicepeakcw4j")
 
     testImplementation platform("org.junit:junit-bom:$junitVersion")
     testImplementation 'org.junit.jupiter:junit-jupiter'

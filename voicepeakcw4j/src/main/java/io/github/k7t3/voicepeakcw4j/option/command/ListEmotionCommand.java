@@ -25,6 +25,10 @@ public class ListEmotionCommand implements Command {
 
     private final String narrator;
 
+    /**
+     * ナレーターに対応する感情を取得するコマンドを生成する
+     * @param narrator ナレーター
+     */
     public ListEmotionCommand(String narrator) {
         if (narrator == null)
             throw new IllegalArgumentException("narrator is null");

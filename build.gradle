@@ -41,7 +41,7 @@ subprojects {
 
                     pom {
                         name = "$project.name"
-                        description = 'This library is a command line wrapper for the VOICEPEAK developed by AHS Co.Ltd.'
+                        description = 'This library is a command line wrapper for the VOICEPEAK published by AHS Co.Ltd.'
                         url = 'https://github.com/k7t3/VOICEPEAKCommandLineWrapper4J'
 
                         licenses {

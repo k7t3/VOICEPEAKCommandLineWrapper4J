@@ -26,6 +26,10 @@ public class SpeechFileOption implements Option {
 
     private final Path path;
 
+    /**
+     * 読み上げるテキストファイルを設定するオプションを生成する
+     * @param path テキストファイルのパス
+     */
     public SpeechFileOption(Path path) {
         if (path == null)
             throw new IllegalArgumentException("path is null");

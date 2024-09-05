@@ -19,9 +19,19 @@ package io.github.k7t3.voicepeakcw4j;
 import java.util.concurrent.Flow;
 import java.util.function.Consumer;
 
+/**
+ * {@link Flow.Subscriber}インターフェースを継承したユーティリティインタフェース
+ * @param <T> 購読するタイプ
+ */
 @FunctionalInterface
 public interface Subscriber<T> extends Flow.Subscriber<T> {
 
+    /**
+     * {@link Flow.Subscriber}の実装を生成するコンビニエンスメソッド
+     * @param consumer 購読する関数
+     * @return サブスクライバーの実装
+     * @param <T> 購読するタイプ
+     */
     static <T> Subscriber<T> of(Consumer<T> consumer) {
         return consumer::accept;
     }

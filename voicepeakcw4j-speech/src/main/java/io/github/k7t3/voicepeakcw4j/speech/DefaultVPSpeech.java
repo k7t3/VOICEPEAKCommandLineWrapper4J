@@ -21,13 +21,13 @@ import io.github.k7t3.voicepeakcw4j.VPExecutable;
 
 import java.util.List;
 
-public class DefaultVPSpeech implements VPSpeech {
+class DefaultVPSpeech implements VPSpeech {
 
     private final VPExecutable executable;
 
     private final VPClient client;
 
-    public DefaultVPSpeech(VPExecutable executable) {
+    DefaultVPSpeech(VPExecutable executable) {
         this.executable = executable;
         this.client = VPClient.create(executable);
     }

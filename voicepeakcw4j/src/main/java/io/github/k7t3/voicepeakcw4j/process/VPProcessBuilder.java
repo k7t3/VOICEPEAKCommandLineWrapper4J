@@ -52,6 +52,10 @@ public class VPProcessBuilder {
     private int speed = Integer.MIN_VALUE;
     private Map<String, Integer> emotion;
 
+    /**
+     * コンストラクタ
+     * @param executable 実行するファイル
+     */
     public VPProcessBuilder(VPExecutable executable) {
         this.executable = executable;
     }

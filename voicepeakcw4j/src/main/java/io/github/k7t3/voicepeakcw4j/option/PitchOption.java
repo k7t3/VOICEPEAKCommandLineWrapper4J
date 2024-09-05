@@ -25,6 +25,10 @@ public class PitchOption implements Option {
 
     private final int pitch;
 
+    /**
+     * 生成する音声のピッチを設定するオプションを生成する
+     * @param pitch ピッチ -300 .. 300
+     */
     public PitchOption(int pitch) {
         if (pitch < -300 || 300 < pitch)
             throw new IllegalArgumentException("pitch is out of range");
