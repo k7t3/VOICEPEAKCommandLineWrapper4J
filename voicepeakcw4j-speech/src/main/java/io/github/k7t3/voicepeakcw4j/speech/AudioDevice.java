@@ -62,10 +62,15 @@ public class AudioDevice {
      * @return 既定のデバイス、あるいはそのデバイスが再生できないときはnull
      */
     public static AudioDevice getDefaultDevice() {
-        var sourceDataLineInfo = new DataLine.Info(SourceDataLine.class, VOICEPEAK_DEFAULT_FORMAT);
-        var mixer = AudioSystem.getMixer(null);
-        if (mixer.isLineSupported(sourceDataLineInfo)) {
-            return new AudioDevice(mixer);
+        try {
+            var sourceDataLineInfo = new DataLine.Info(SourceDataLine.class, VOICEPEAK_DEFAULT_FORMAT);
+            var mixer = AudioSystem.getMixer(null);
+            if (mixer.isLineSupported(sourceDataLineInfo)) {
+                return new AudioDevice(mixer);
+            }
+        } catch (IllegalArgumentException ignored) {
+            // 対応するミキサーがないときにIllegalArgumentExceptionがスローされるため無視する
+            return null;
         }
         return null;
     }
