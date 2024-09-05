@@ -21,10 +21,18 @@ package io.github.k7t3.voicepeakcw4j.exception;
  */
 public class VPExecutionException extends RuntimeException {
 
+    /**
+     * 例外インスタンスを生成する
+     * @param e ソース
+     */
     public VPExecutionException(Exception e) {
         super(e);
     }
 
+    /**
+     * 例外インスタンスを生成する
+     * @param message 例外メッセージ
+     */
     public VPExecutionException(String message) {
         super(message);
     }

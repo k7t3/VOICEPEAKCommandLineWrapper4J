@@ -25,6 +25,10 @@ public class SpeechTextOption implements Option {
 
     private final String text;
 
+    /**
+     * 読み上げるテキストを設定するオプションを生成する
+     * @param text 読み上げるテキスト
+     */
     public SpeechTextOption(String text) {
         if (text == null || text.trim().isEmpty())
             throw new IllegalArgumentException("text is null or empty");

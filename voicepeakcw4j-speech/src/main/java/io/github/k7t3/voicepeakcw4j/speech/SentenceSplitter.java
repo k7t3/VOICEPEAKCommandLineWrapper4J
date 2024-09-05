@@ -34,10 +34,17 @@ public class SentenceSplitter {
 
     private final Locale locale;
 
+    /**
+     * コンストラクタ
+     * @param locale 解釈するロケール
+     */
     public SentenceSplitter(Locale locale) {
         this.locale = locale == null ? Locale.getDefault() : locale;
     }
 
+    /**
+     * コンストラクタ
+     */
     public SentenceSplitter() {
         this(null);
     }
@@ -96,10 +103,9 @@ public class SentenceSplitter {
 
             // 句読点・空白のときに要素とする
             if (!Character.isLetter(word.codePointAt(0))) {
-                // 改行文字は追加しない
-                if (!"\n".equals(word)) {
-                    builder.append(word);
-                }
+
+                builder.append(word);
+
                 if (!builder.isEmpty()) {
                     list.add(builder.toString());
                     builder = new StringBuilder();

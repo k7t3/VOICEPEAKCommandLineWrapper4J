@@ -26,6 +26,10 @@ public class OutputFileOption implements Option {
 
     private final Path path;
 
+    /**
+     * 音声ファイルを出力するパスを設定するオプションを生成する
+     * @param path 出力するパス
+     */
     public OutputFileOption(Path path) {
         if (path == null)
             throw new IllegalArgumentException("path is null");

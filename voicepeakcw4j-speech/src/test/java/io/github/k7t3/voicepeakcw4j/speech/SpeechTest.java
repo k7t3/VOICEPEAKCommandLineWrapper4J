@@ -20,10 +20,11 @@ import io.github.k7t3.voicepeakcw4j.Subscriber;
 import io.github.k7t3.voicepeakcw4j.VPExecutable;
 
 import java.nio.file.Paths;
+import java.util.concurrent.ExecutionException;
 
 public class SpeechTest {
 
-    public static void main(String...args) {
+    public static void main(String...args) throws ExecutionException, InterruptedException {
         var executable = new VPExecutable(Paths.get(System.getenv("voicepeak_bin")));
 
         var text = """
@@ -41,9 +42,10 @@ public class SpeechTest {
         var speech = new SpeechBuilder(executable)
                 .withNarrator("Tohoku Kiritan")
                 .withSpeechText(text)
-                .withVolumeRate(0.07f)
+                .withVolumeRate(0.1f)
                 .withSpeed(110)
                 .withMaxSentenceLength(140)
+                .withAudioDevice(AudioDevice.getDefaultDevice())
                 .build();
 
         Subscriber<String> standardSub = System.out::println;
@@ -52,7 +54,7 @@ public class SpeechTest {
         speech.setStandardOutSubscriber(standardSub);
         speech.setErrorOutSubscriber(errorSub);
 
-        speech.run();
+        speech.run().get();
     }
 
 }

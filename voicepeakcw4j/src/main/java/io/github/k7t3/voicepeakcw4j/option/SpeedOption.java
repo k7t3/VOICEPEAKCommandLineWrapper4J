@@ -25,6 +25,10 @@ public class SpeedOption implements Option {
 
     private final int speed;
 
+    /**
+     * 読み上げるスピードを設定するオプションを生成する
+     * @param speed 読み上げるスピード
+     */
     public SpeedOption(int speed) {
         if (speed < 50 || 200 < speed)
             throw new IllegalArgumentException("speed is out of range");

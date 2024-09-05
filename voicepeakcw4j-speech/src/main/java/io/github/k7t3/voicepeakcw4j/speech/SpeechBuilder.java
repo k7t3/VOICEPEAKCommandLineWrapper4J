@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -62,7 +63,10 @@ public class SpeechBuilder {
 
     private long delayMilliSeconds = Long.MIN_VALUE;
 
+    private AudioDevice audioDevice;
     private float volumeRate = DEFAULT_VOLUME_RATE;
+
+    private Executor voicepeakExecutor;
 
     /**
      * 引数の実行ファイルを使用したスピーチランナーインスタンスを作成する
@@ -190,6 +194,19 @@ public class SpeechBuilder {
     }
 
     /**
+     * 音声を再生するデバイスを設定する。
+     * <p>
+     *     デフォルト値は既定のデバイス
+     * </p>
+     * @param audioDevice 音声を再生するデバイス
+     * @return このインスタンス
+     */
+    public SpeechBuilder withAudioDevice(AudioDevice audioDevice) {
+        this.audioDevice = audioDevice;
+        return this;
+    }
+
+    /**
      * 読み上げる音声のゲインの割合を設定する。
      * @param volumeRate 0.0 ~ 1.0
      * @return このインスタンス
@@ -205,6 +222,9 @@ public class SpeechBuilder {
      *     読み上げる文字数が上限である140を超える場合、複数回コマンドラインが実行されるため、
      *     即座に読み上げを開始すると次に続く音声の生成が間に合わず、空白時間が発生する
      *     可能性がある。できるだけ滑らかに読み上げるために指定時間遅延させることができる。
+     * </p>
+     * <p>
+     *     メソッド{@link SpeechBuilder#withDelayTime(TimeUnit, long)}とは排他的。
      * </p>
      * <p>
      *     規定値は 0
@@ -225,6 +245,9 @@ public class SpeechBuilder {
      *     即座に読み上げを開始すると次に続く音声の生成が間に合わず、空白時間が発生する
      *     可能性がある。できるだけ滑らかに読み上げるために指定時間遅延させることができる。
      * </p>
+     * <p>
+     *     メソッド{@link SpeechBuilder#withDelayMilliSeconds(long)}とは排他的。
+     * </p>
      * @param unit 時間単位
      * @param amount 遅延量
      * @return このインスタンス
@@ -232,6 +255,24 @@ public class SpeechBuilder {
      */
     public SpeechBuilder withDelayTime(TimeUnit unit, long amount) {
         this.delayMilliSeconds = unit.toMillis(amount);
+        return this;
+    }
+
+    /**
+     * VOICEPEAKコマンドを実行するExecutorを設定する
+     * <p>
+     *     VOICEPEAK v1.2.11現在、コマンドライン実行は並列実行が許可されていないため、
+     *     複数スレッドで動作させることを目的として{@link Executor}を設定するべきではない。
+     * </p>
+     * <p>
+     *     むしろVOICEPEAKの並列実行を制限するために、
+     *     シングルスレッドのExecutorを割り当てるために使用する。
+     * </p>
+     * @param executor Executor
+     * @return このインスタンス
+     */
+    public SpeechBuilder withVoicePeakExecutor(Executor executor) {
+        this.voicepeakExecutor = executor;
         return this;
     }
 
@@ -285,6 +326,10 @@ public class SpeechBuilder {
             sentences.forEach(s -> LOGGER.log(System.Logger.Level.DEBUG, s));
         }
 
+        if (audioDevice == null) {
+            audioDevice = AudioDevice.getDefaultDevice();
+        }
+
         var volumeRate = Math.clamp(this.volumeRate, 0.0f, 1.0f);
         var delayMilliSeconds = Math.max(0, this.delayMilliSeconds);
 
@@ -293,7 +338,7 @@ public class SpeechBuilder {
         for (int i = 0; i < sentences.size(); i++) {
             parameters.add(createParameter(i, sentences.get(i)));
         }
-        return new SpeechRunner(volumeRate, delayMilliSeconds, parameters);
+        return new SpeechRunner(audioDevice, volumeRate, delayMilliSeconds, voicepeakExecutor, parameters);
     }
 
     private SpeechParameter createParameter(int index, String sentence) {

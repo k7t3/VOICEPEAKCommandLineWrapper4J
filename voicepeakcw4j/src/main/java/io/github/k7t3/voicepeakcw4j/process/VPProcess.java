@@ -33,6 +33,10 @@ public class VPProcess {
     private final MessagePublisher standardOut = new MessagePublisher();
     private final MessagePublisher errorOut = new MessagePublisher();
 
+    /**
+     * コンストラクタ
+     * @param processBuilder プロセスビルダー
+     */
     public VPProcess(ProcessBuilder processBuilder) {
         this.processBuilder = processBuilder;
     }

@@ -36,7 +36,7 @@ import java.util.concurrent.*;
  *     手動で実行していると正常に動作しないことがある。
  * </p>
  * <p>
- *     処理速度について、多くの環境において音声の再生速度＜音声の生成速度であることから、
+ *     処理速度について、多くの環境において音声の再生速度＞音声の生成速度であることから、
  *     シームレスな読み上げを実現するために最初の読み上げに遅延時間を設定することができる。
  *     {@link SpeechBuilder#withDelayTime(TimeUnit, long)},
  *     {@link SpeechBuilder#withDelayMilliSeconds(long)}
@@ -51,15 +51,35 @@ public class SpeechRunner {
 
     private final List<SpeechParameter> parameters;
 
+    private final AudioDevice audioDevice;
+
     private final float volumeRate;
 
     private final long delayMilliSeconds;
 
-    SpeechRunner(float volumeRate, long delayMilliSeconds, List<SpeechParameter> parameters) {
+    private final Executor voicePeakExecutor;
+
+    /**
+     * コンストラクタ
+     * @param audioDevice オーディオを再生するデバイス
+     * @param volumeRate ボリュームの割合 0.0f .. 2.0f
+     * @param delayMilliSeconds 遅延時間
+     * @param voicePeakExecutor VOICEPEAKを実行するExecutor。nullable
+     * @param parameters スピーチに関するパラメータ
+     */
+    SpeechRunner(
+            AudioDevice audioDevice,
+            float volumeRate,
+            long delayMilliSeconds,
+            Executor voicePeakExecutor,
+            List<SpeechParameter> parameters
+    ) {
         if (parameters == null || parameters.isEmpty())
             throw new IllegalArgumentException();
+        this.audioDevice = audioDevice;
         this.volumeRate = volumeRate;
         this.delayMilliSeconds = delayMilliSeconds;
+        this.voicePeakExecutor = voicePeakExecutor;
         this.parameters = parameters;
     }
 
@@ -90,21 +110,30 @@ public class SpeechRunner {
     /**
      * ランナーを実行する。
      * <p>
-     *     {@link SpeechBuilder}で設定した内容に基づいて読み上げを実行する。
+     * {@link SpeechBuilder}で設定した内容に基づいて読み上げを実行する。
      * </p>
      */
-    public void run() {
+    public CompletableFuture<Void> run() {
         LOGGER.log(System.Logger.Level.INFO, "runner started");
+
+        if (parameters.isEmpty()) {
+            return CompletableFuture.completedFuture(null);
+        }
 
         // 現在のVOICEPEAKのバージョン(v.1.2.11)はコマンドラインの並列実行を許可していない
         // エラー出力
         // In this version, up to 1 command line instance can be executed at same time.
-        var voicePeakExecutor = createExecutor("VOICEPEAKCommandLineWrapper");
+        var executor = voicePeakExecutor == null
+                ? createExecutor("VOICEPEAKCommandLineWrapper")
+                : voicePeakExecutor;
         var audioPlayerExecutor = createExecutor("AudioPlayer");
         LOGGER.log(System.Logger.Level.DEBUG, "initialized executors");
 
-        var player = new AudioPlayer();
+        var player = new AudioPlayer(audioDevice);
         player.requestVolume(volumeRate);
+
+        var futures = new CompletableFuture<?>[parameters.size() * 2 + 1];
+        int i = 0;
 
         for (var parameter : parameters) {
             var process = parameter.process();
@@ -116,19 +145,26 @@ public class SpeechRunner {
                 process.getErrorOut().subscribe(errorOutSubscriber);
             }
 
-            var voicePeakFuture = queueProcess(parameter, voicePeakExecutor);
+            var voicePeakFuture = queueProcess(parameter, executor);
             LOGGER.log(System.Logger.Level.DEBUG, "queued VOICEPEAK process");
 
-            queuePlayAudio(player, voicePeakFuture, audioPlayerExecutor);
+            var playAudioFuture = queuePlayAudio(player, voicePeakFuture, audioPlayerExecutor);
             LOGGER.log(System.Logger.Level.DEBUG, "queued play audio request");
+
+            futures[i++] = voicePeakFuture;
+            futures[i++] = playAudioFuture;
         }
 
         // オーディオプレイヤーの終了処理
-        audioPlayerExecutor.submit(player::close);
+        var closeAudioFuture = CompletableFuture.runAsync(player::close, audioPlayerExecutor);
+        futures[i] = closeAudioFuture;
 
-        voicePeakExecutor.shutdown();
+        if (voicePeakExecutor == null)
+            ((ExecutorService) executor).shutdown();
         audioPlayerExecutor.shutdown();
         LOGGER.log(System.Logger.Level.DEBUG, "shutdown executors");
+
+        return CompletableFuture.allOf(futures);
     }
 
     private record RunnerStage(int status, SpeechParameter parameter) {}
@@ -136,8 +172,8 @@ public class SpeechRunner {
     /**
      * オーディオの再生をキューする
      */
-    private void queuePlayAudio(AudioPlayer player, CompletableFuture<RunnerStage> voicePeakFuture, Executor executor) {
-        CompletableFuture.supplyAsync(() -> playAudio(player, voicePeakFuture), executor).thenAcceptAsync(file -> {
+    private CompletableFuture<Void> queuePlayAudio(AudioPlayer player, CompletableFuture<RunnerStage> voicePeakFuture, Executor executor) {
+        return CompletableFuture.supplyAsync(() -> playAudio(player, voicePeakFuture), executor).thenAcceptAsync(file -> {
             if (file == null)
                 return;
             try {

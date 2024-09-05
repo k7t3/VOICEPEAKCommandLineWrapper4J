@@ -39,14 +39,20 @@ class AudioPlayer implements AutoCloseable {
     private volatile boolean closed = false;
     private volatile boolean initialized = false;
 
+    private final AudioDevice audioDevice;
+
     private SourceDataLine line;
     private FloatControl volumeControl;
 
-    public AudioPlayer() {
+    public AudioPlayer(AudioDevice audioDevice) {
+        this.audioDevice = audioDevice;
     }
 
     /**
-     * 0.0 ~ 1.0
+     * 0.0 ~ 2.0
+     * <p>
+     *     1/10000倍から2倍まで
+     * </p>
      *
      * @param volumeRate ボリュームの比率
      */
@@ -60,14 +66,20 @@ class AudioPlayer implements AutoCloseable {
         cancelRequest.set(true);
     }
 
-    private void initialize(AudioFormat format) {
+    private void initialize() {
+        if (audioDevice == null) {
+            LOGGER.log(System.Logger.Level.ERROR, "audio device can not play audio");
+            close();
+            return;
+        }
+
         try {
 
             initialized = true;
 
-            // オーディオフォーマットに対応したラインを取得
-            line = AudioSystem.getSourceDataLine(format);
-            line.open(format);
+            // オーディオデバイスのラインを取得
+            line = audioDevice.getSourceDataLine();
+            line.open();
             line.start();
 
             // ラインが対応している場合はそのコントロールを使用
@@ -82,7 +94,7 @@ class AudioPlayer implements AutoCloseable {
             }
 
         } catch (LineUnavailableException e) {
-            LOGGER.log(System.Logger.Level.ERROR, "audio format is not supported " + format.toString());
+            LOGGER.log(System.Logger.Level.ERROR, "audio format is not supported");
             close();
         }
     }
@@ -93,7 +105,13 @@ class AudioPlayer implements AutoCloseable {
         var volumeRate = volumeQueue.poll();
         if (volumeRate == null) return;
 
-        var decibel = (volumeRate <= 0.0f) ? -80.0f : 20 * (float) Math.log10(volumeRate);
+        // logの0は不定なので下限を設ける
+        volumeRate = Math.clamp(volumeRate, volumeControl.getMinimum(), volumeControl.getMaximum());
+
+        // 音圧のデシベルは10のべき乗ごとに20倍になるらしい
+        // https://www.mgco.jp/magazine/plan/mame/b_others/2001/
+        var decibel = (float) (20 * Math.log10(volumeRate));
+
         volumeControl.setValue(decibel);
         LOGGER.log(System.Logger.Level.INFO, "set decibel " + decibel);
     }
@@ -107,8 +125,7 @@ class AudioPlayer implements AutoCloseable {
         try (var input = AudioSystem.getAudioInputStream(new BufferedInputStream(Files.newInputStream(audioFile)))) {
 
             if (!initialized) {
-                var audioFormat = input.getFormat();
-                initialize(audioFormat);
+                initialize();
             }
 
             // オーディオを読み込んでラインに書き込む

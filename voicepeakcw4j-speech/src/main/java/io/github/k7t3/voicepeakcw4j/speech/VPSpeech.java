@@ -21,6 +21,9 @@ import io.github.k7t3.voicepeakcw4j.exception.VPExecutionException;
 
 import java.util.List;
 
+/**
+ * VOICEPEAKの音声合成機能を使用してテキストを読み上げるためのクラス
+ */
 public interface VPSpeech {
 
     /**

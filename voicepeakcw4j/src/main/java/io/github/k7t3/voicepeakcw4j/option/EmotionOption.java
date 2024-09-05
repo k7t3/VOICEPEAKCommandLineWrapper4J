@@ -28,6 +28,10 @@ public class EmotionOption implements Option {
 
     private final Map<String, Integer> emotions;
 
+    /**
+     * 感情を設定するオプションを生成する
+     * @param emotions 感情
+     */
     public EmotionOption(Map<String, Integer> emotions) {
         if (emotions == null)
             throw new IllegalArgumentException("emotions is null");
