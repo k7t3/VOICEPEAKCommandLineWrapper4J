@@ -1,12 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<!DOCTYPE configuration >
 <configuration>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%date [%-5level] [%logger{1}] [%thread] - %message%n</pattern>
+            <pattern>%date [%-5level] [%logger{1}.%method] [%thread] - %message%n</pattern>
         </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
     </appender>
 
     <!-- WARN以上は標準エラー出力 -->
@@ -16,7 +18,7 @@
         </filter>
         <target>System.err</target>
         <encoder>
-            <pattern>[%-5level] %date{MM/dd HH:mm:ss.SSS} %logger{36} - %msg%n</pattern>
+            <pattern>%date [%-5level] [%logger{1}.%method] [%thread] - %message%n</pattern>
         </encoder>
     </appender>
 

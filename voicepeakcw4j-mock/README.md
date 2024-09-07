@@ -4,7 +4,9 @@
 
 ## Implementation
 * Javaアプリケーションとして作成
+* 想定しているナレーターは東北きりたん(Tohoku Kiritan)、ずんだもん(Zundamon)のみ
 * コマンドライン実行のオプションの内容を標準出力にプリントする
+* サンプル音声をコピーすることで音声を合成したこととする
 
 ## Usage
 1. [VoicePeak.java](src/main/java/com/github/k7t3/voicepeakcw4j/VoicePeak.java)を作成

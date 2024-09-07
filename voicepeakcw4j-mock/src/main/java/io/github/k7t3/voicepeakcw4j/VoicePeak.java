@@ -23,6 +23,9 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+/**
+ * VOICEPEAK v1.2.11
+ */
 public class VoicePeak {
 
     public static void main(String[] args) {
@@ -51,13 +54,19 @@ public class VoicePeak {
             }
 
             if (cmd.hasOption("list-narrator")) {
-                listNarrators();
+                System.out.println("Zundamon");
+                System.out.println("Tohoku Kiritan");
                 return;
             }
 
             if (cmd.hasOption("list-emotion")) {
                 String narrator = cmd.getOptionValue("list-emotion");
-                listEmotions(narrator);
+                if (narrator == null || narrator.trim().isEmpty()) {
+                    System.out.println("error parsing options: Option 'list-emotion' is missing an argument");
+                    return;
+                }
+
+                NarratorEmotions.get(narrator).forEach(System.out::println);
                 return;
             }
 
@@ -115,15 +124,6 @@ public class VoicePeak {
             System.err.println(e.getMessage());
             formatter.printHelp("voicepeak", options);
         }
-    }
-
-    private static void listNarrators() {
-        System.out.println("Zundamon");
-        System.out.println("Tohoku Kiritan");
-    }
-
-    private static void listEmotions(String narrator) {
-        NarratorEmotions.get(narrator).forEach(System.out::println);
     }
 
 }

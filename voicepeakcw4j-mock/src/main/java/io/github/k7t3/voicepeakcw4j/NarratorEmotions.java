@@ -18,6 +18,9 @@ package io.github.k7t3.voicepeakcw4j;
 
 import java.util.List;
 
+/**
+ * VOICEPEAK v1.2.11
+ */
 class NarratorEmotions {
 
     public static List<String> get(String narrator) {

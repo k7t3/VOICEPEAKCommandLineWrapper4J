@@ -41,8 +41,43 @@ public class AudioDevice {
 
     private final Mixer mixer;
 
-    private AudioDevice(Mixer mixer) {
+    private final Mixer.Info info;
+
+    AudioDevice(Mixer mixer) {
         this.mixer = mixer;
+        this.info = mixer.getMixerInfo();
+    }
+
+    /**
+     * オーディオデバイスの名称を返す
+     * @return オーディオデバイスの名称
+     */
+    public String getName() {
+        return info.getName();
+    }
+
+    /**
+     * オーディオデバイスの概要を返す
+     * @return オーディオデバイスの概要
+     */
+    public String getDescription() {
+        return info.getDescription();
+    }
+
+    /**
+     * オーディオデバイスのベンダーを返す
+     * @return オーディオデバイスのベンダー
+     */
+    public String getVendor() {
+        return info.getVendor();
+    }
+
+    /**
+     * オーディオデバイスのバージョンを返す
+     * @return オーディオデバイスのバージョン
+     */
+    public String getVersion() {
+        return info.getVersion();
     }
 
     SourceDataLine getSourceDataLine() {

@@ -19,6 +19,7 @@ package io.github.k7t3.voicepeakcw4j.process;
 import io.github.k7t3.voicepeakcw4j.VPExecutable;
 import io.github.k7t3.voicepeakcw4j.exception.VPExecutionException;
 import io.github.k7t3.voicepeakcw4j.option.*;
+import io.github.k7t3.voicepeakcw4j.process.impl.DefaultVPProcess;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -224,7 +225,7 @@ public class VPProcessBuilder {
             }
         }
 
-        return new VPProcess(new ProcessBuilder(commands));
+        return new DefaultVPProcess(new ProcessBuilder(commands));
     }
 
 }

@@ -17,7 +17,7 @@
 package io.github.k7t3.voicepeakcw4j.option.command;
 
 import io.github.k7t3.voicepeakcw4j.VPExecutable;
-import io.github.k7t3.voicepeakcw4j.process.VPProcess;
+import io.github.k7t3.voicepeakcw4j.process.impl.DefaultVPProcess;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,7 +55,7 @@ public class CommandRunner {
 
         var sub = new CommandSubscriber();
 
-        var process = new VPProcess(new ProcessBuilder(commands));
+        var process = new DefaultVPProcess(new ProcessBuilder(commands));
         process.getStandardOut().subscribe(sub);
 
         try {

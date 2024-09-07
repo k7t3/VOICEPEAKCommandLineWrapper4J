@@ -16,36 +16,19 @@
 
 package io.github.k7t3.voicepeakcw4j.speech;
 
+import io.github.k7t3.voicepeakcw4j.VPClient;
 import io.github.k7t3.voicepeakcw4j.VPExecutable;
-import io.github.k7t3.voicepeakcw4j.exception.VPExecutionException;
-
-import java.util.List;
 
 /**
  * VOICEPEAKの音声合成機能を使用してテキストを読み上げるためのクラス
  */
-public interface VPSpeech {
+public interface VPSpeech extends VPClient {
 
     /**
      * テキストを読み上げるためのビルダーを返す
      * @return テキストの読み上げビルダー
      */
-    SpeechBuilder builder();
-
-    /**
-     * ナレーターに対応する感情の一覧を取得する
-     * @param narrator ナレーター
-     * @return ナレーターに対応する感情のリスト
-     * @throws VPExecutionException VOICEPEAKのコマンドライン実行に失敗
-     */
-    List<String> getEmotions(String narrator);
-
-    /**
-     * インストールされているナレーターの一覧を返す
-     * @return インストールされているナレーターの一覧
-     * @throws VPExecutionException VOICEPEAKのコマンドライン実行に失敗
-     */
-    List<String> getNarrators();
+    SpeechBuilder speech();
 
     /**
      * 既定のスピーチクライアントを生成する。
