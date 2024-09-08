@@ -19,6 +19,9 @@ package io.github.k7t3.voicepeakcw4j.process;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 
+/**
+ * VOICEPEAKコマンドラインを実行するダミープロセス
+ */
 public interface VPProcess {
 
     /**

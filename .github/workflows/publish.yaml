@@ -59,3 +59,4 @@ jobs:
         with:
           draft: true # ドラフトリリースとし、公開は手動で行う
           files: release/**
+          generate_release_notes: true # リリースノートの自動生成

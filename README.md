@@ -27,7 +27,7 @@ Usage:
 
 コマンドラインラッパーライブラリを使用するには、ライブラリの依存関係をプロジェクトに追加します。
 ```groovy
-implementation group: 'io.github.k7t3', name: 'voicepeakcw4j', version: '0.1.0'
+implementation group: 'io.github.k7t3', name: 'voicepeakcw4j', version: '0.1.2'
 ```
 
 1. コマンドラインを実行するために、実行ファイルのパスを指定します。
@@ -79,7 +79,7 @@ implementation group: 'io.github.k7t3', name: 'voicepeakcw4j', version: '0.1.0'
 
 音声の即時読み上げスピーチライブラリを使用するには、ライブラリの依存関係をプロジェクトに追加します。
 ```groovy
-implementation group: 'io.github.k7t3', name: 'voicepeakcw4j-speech', version: '0.1.0'
+implementation group: 'io.github.k7t3', name: 'voicepeakcw4j-speech', version: '0.1.2'
 ```
 
 1. VOICEPEAK実行パスを指定し、スピーチクライアントを生成します。
@@ -108,7 +108,9 @@ implementation group: 'io.github.k7t3', name: 'voicepeakcw4j-speech', version: '
             .withVolumeRate(0.2f)
             .withSpeed(110)
             .build();
-    speech.run();
+
+    // 読み上げを開始して状態を取得
+    var state = speech.start();
     ```
 
 

@@ -22,6 +22,13 @@ import java.util.List;
  * VOICEPEAKの<code>--list-narrator</code>オプションの定義
  */
 public class ListNarratorCommand implements Command {
+
+    /**
+     * コンストラクタ
+     */
+    public ListNarratorCommand() {
+    }
+
     @Override
     public void fill(List<String> commands) {
         commands.add("--list-narrator");
