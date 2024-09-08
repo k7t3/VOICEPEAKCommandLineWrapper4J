@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.k7t3.voicepeakcw4j.process;
+package io.github.k7t3.voicepeakcw4j.process.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;

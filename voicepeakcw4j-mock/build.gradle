@@ -4,7 +4,7 @@ plugins {
 }
 
 application {
-    mainClass = 'com.github.k7t3.voicepeakcw4j.VoicePeak'
+    mainClass = 'io.github.k7t3.voicepeakcw4j.VoicePeak'
 }
 
 repositories {
@@ -24,6 +24,11 @@ java {
 
 test {
     useJUnitPlatform()
+}
+
+shadowJar {
+    // バージョン名をアーカイブに含めないようにする
+    archiveVersion.set('')
 }
 
 tasks.register('buildMock', Copy) {

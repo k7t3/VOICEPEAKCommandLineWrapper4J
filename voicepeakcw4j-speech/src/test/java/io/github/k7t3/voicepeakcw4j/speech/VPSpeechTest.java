@@ -30,8 +30,8 @@ class VPSpeechTest {
     }
 
     @Test
-    void builder() {
-        var builder = VPSpeech.create(new TestVPExecutable()).builder();
+    void speech() {
+        var builder = VPSpeech.create(new TestVPExecutable()).speech();
         assertNotNull(builder);
     }
 }

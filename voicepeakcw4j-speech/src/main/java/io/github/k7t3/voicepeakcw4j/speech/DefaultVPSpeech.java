@@ -18,6 +18,7 @@ package io.github.k7t3.voicepeakcw4j.speech;
 
 import io.github.k7t3.voicepeakcw4j.VPClient;
 import io.github.k7t3.voicepeakcw4j.VPExecutable;
+import io.github.k7t3.voicepeakcw4j.process.VPProcessBuilder;
 
 import java.util.List;
 
@@ -33,8 +34,13 @@ class DefaultVPSpeech implements VPSpeech {
     }
 
     @Override
-    public SpeechBuilder builder() {
-        return new SpeechBuilder(executable);
+    public VPProcessBuilder builder() {
+        return new VPProcessBuilder(executable);
+    }
+
+    @Override
+    public SpeechBuilder speech() {
+        return new SpeechBuilder(builder());
     }
 
     @Override

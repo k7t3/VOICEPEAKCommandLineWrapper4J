@@ -19,11 +19,17 @@ package io.github.k7t3.voicepeakcw4j;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+/**
+ * VOICEPEAK v1.2.11
+ */
 @SuppressWarnings("UnusedReturnValue")
-public class VoicepeakRunner {
+class VoicepeakRunner {
 
     private String narrator;
 
@@ -73,6 +79,9 @@ public class VoicepeakRunner {
         return this;
     }
 
+    /**
+     * 対応するナレーターが存在しないとき、あるいはナレーターに対応する感情が指定されたときに出力されるエラー
+     */
     private void errorPrint() {
         System.err.println("Internal BUG occurred. Please report what you are doing and these details to us.");
         System.err.println("===== BEGIN BUG REPORT =====");
@@ -111,15 +120,27 @@ public class VoicepeakRunner {
             System.out.println("Speech File: " + speechFile.toAbsolutePath());
         }
 
-        if (output != null) {
-            if (!Files.exists(output)) {
-                try {
-                    Files.createFile(output);
-                } catch (IOException e) {
-                    System.getLogger("VOICEPEAK Mock").log(System.Logger.Level.WARNING, "failed to output");
-                }
+        var o = output;
+        if (o == null) {
+            // 既定の出力場所はホームディレクトリのoutput.wav
+            o = Path.of(System.getProperty("user.home"), "output.wav");
+        }
+        {
+            try {
+                // 生成完了までの遅延として遅延をエミュレート
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                System.err.println("failed to sleep");
             }
-            System.out.println("Output: " + output.toAbsolutePath());
+            try {
+                // テスト音声を出力ファイルとしてコピーする
+                try (var input = getClass().getResourceAsStream("/test.wav")) {
+                    Files.copy(Objects.requireNonNull(input), o, StandardCopyOption.REPLACE_EXISTING);
+                }
+            } catch (IOException e) {
+                System.err.println("failed to output");
+            }
+            System.out.println("Output: " + o.toAbsolutePath());
         }
 
         if (pitch != Integer.MIN_VALUE) {

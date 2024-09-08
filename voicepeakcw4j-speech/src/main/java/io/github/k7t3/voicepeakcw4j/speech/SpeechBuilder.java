@@ -16,9 +16,9 @@
 
 package io.github.k7t3.voicepeakcw4j.speech;
 
-import io.github.k7t3.voicepeakcw4j.VPExecutable;
+import io.github.k7t3.voicepeakcw4j.exception.VPExecutionException;
 import io.github.k7t3.voicepeakcw4j.process.VPProcess;
-import io.github.k7t3.voicepeakcw4j.option.*;
+import io.github.k7t3.voicepeakcw4j.process.VPProcessBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -47,14 +47,8 @@ public class SpeechBuilder {
     private static final int DEFAULT_MAX_SENTENCE_LENGTH = 140; // VOICEPEAKのデフォルト
     private static final float DEFAULT_VOLUME_RATE = 0.5f;
 
-    private final VPExecutable executable;
-
-    private String narrator;
-    private String speechText;
-
-    private int pitch = Integer.MIN_VALUE;
-    private int speed = Integer.MIN_VALUE;
-    private Map<String, Integer> emotion;
+    private final VPProcessBuilder builder;
+    private String speechText = null;
 
     private Path temporalDirectory = Paths.get(DEFAULT_TEMP_DIRECTORY);
 
@@ -70,10 +64,10 @@ public class SpeechBuilder {
 
     /**
      * 引数の実行ファイルを使用したスピーチランナーインスタンスを作成する
-     * @param executable VOICEPEAKの実行ファイル
+     * @param builder VOICEPEAKプロセスのビルダー
      */
-    SpeechBuilder(VPExecutable executable) {
-        this.executable = executable;
+    SpeechBuilder(VPProcessBuilder builder) {
+        this.builder = builder;
     }
 
     /**
@@ -86,7 +80,7 @@ public class SpeechBuilder {
      * @return このインスタンス
      */
     public SpeechBuilder withNarrator(String narrator) {
-        this.narrator = narrator;
+        builder.withNarrator(narrator);
         return this;
     }
 
@@ -105,6 +99,7 @@ public class SpeechBuilder {
      */
     public SpeechBuilder withSpeechText(String speechText) {
         this.speechText = speechText;
+        builder.withSpeechText(speechText);
         return this;
     }
 
@@ -117,7 +112,7 @@ public class SpeechBuilder {
      * @return このインスタンス
      */
     public SpeechBuilder withPitch(int pitch) {
-        this.pitch = pitch;
+        builder.withPitch(pitch);
         return this;
     }
 
@@ -130,7 +125,7 @@ public class SpeechBuilder {
      * @return このインスタンス
      */
     public SpeechBuilder withSpeed(int speed) {
-        this.speed = speed;
+        builder.withSpeed(speed);
         return this;
     }
 
@@ -146,7 +141,7 @@ public class SpeechBuilder {
      * @return このインスタンス
      */
     public SpeechBuilder withEmotion(Map<String, Integer> emotion) {
-        this.emotion = emotion;
+        builder.withEmotion(emotion);
         return this;
     }
 
@@ -346,48 +341,23 @@ public class SpeechBuilder {
             throw new IllegalStateException("require speech text or file");
         }
 
-        var commands = new ArrayList<String>();
-        executable.fill(commands);
-
-        new SpeechTextOption(sentence).fill(commands);
-
-        if (narrator != null) {
-            new NarratorOption(this.narrator).fill(commands);
-        }
-
-        if (pitch != Integer.MIN_VALUE) {
-            try {
-                new PitchOption(pitch).fill(commands);
-            } catch (IllegalArgumentException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-        if (speed != Integer.MIN_VALUE) {
-            try {
-                new SpeedOption(speed).fill(commands);
-            } catch (IllegalArgumentException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-        if (emotion != null) {
-            try {
-                new EmotionOption(emotion).fill(commands);
-            } catch (IllegalArgumentException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
         Path outputPath;
         try {
             outputPath = determineOutputPath();
-            new OutputFileOption(outputPath).fill(commands);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
 
-        var process = new VPProcess(new ProcessBuilder(commands));
+        VPProcess process;
+        try {
+            process = builder
+                    .withSpeechText(sentence)
+                    .withOutput(outputPath)
+                    .build();
+        } catch (VPExecutionException e) {
+            throw new IllegalStateException(e);
+        }
+
         return new SpeechParameter(index, process, outputPath);
     }
 

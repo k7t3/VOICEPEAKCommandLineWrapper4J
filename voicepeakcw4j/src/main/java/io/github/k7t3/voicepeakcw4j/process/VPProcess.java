@@ -16,80 +16,48 @@
 
 package io.github.k7t3.voicepeakcw4j.process;
 
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Flow;
 
 /**
  * VOICEPEAKコマンドラインを実行するダミープロセス
  */
-public class VPProcess {
-
-    private static final System.Logger LOGGER = System.getLogger(VPProcess.class.getName());
-
-    private final ProcessBuilder processBuilder;
-
-    private final MessagePublisher standardOut = new MessagePublisher();
-    private final MessagePublisher errorOut = new MessagePublisher();
-
-    /**
-     * コンストラクタ
-     * @param processBuilder プロセスビルダー
-     */
-    public VPProcess(ProcessBuilder processBuilder) {
-        this.processBuilder = processBuilder;
-    }
+public interface VPProcess {
 
     /**
      * VOICEPEAKコマンドラインを実行し、その将来的な実行結果を表す{@link CompletableFuture}を返す。
      * <p>
-     *     このメソッドは同じインスタンスにおいて繰り返し実行できるが、
-     *     同時に実行すると{@link #getStandardOut()}及び
-     *     {@link #getErrorOut()}からメッセージが同時に配信されるため区別できない可能性がある。
+     * このメソッドは同じインスタンスにおいて繰り返し実行できるが、
+     * 同時に実行すると{@link #getStandardOut()}及び
+     * {@link #getErrorOut()}からメッセージが同時に配信されるため区別できない可能性がある。
      * </p>
      * <p>
-     *     コマンドラインの実行に失敗したときは{@link RuntimeException}をスローする。
+     * コマンドラインの実行に失敗したときは{@link RuntimeException}をスローする。
      * </p>
+     *
      * @return VOICEPEAKコマンドラインの将来的な実行結果を表すfuture
      * @throws RuntimeException コマンドラインの実行に失敗したとき
      */
-    public CompletableFuture<Integer> start() {
-        Process process;
-        try {
-            process = processBuilder.start();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        LOGGER.log(System.Logger.Level.DEBUG, "started process pid = " + process.pid());
-
-        var executor = Executors.newVirtualThreadPerTaskExecutor();
-        standardOut.start(process.inputReader(), executor);
-        errorOut.start(process.errorReader(), executor);
-        executor.shutdown();
-
-        return process.onExit().thenApply(Process::exitValue);
-    }
+    CompletableFuture<Integer> start();
 
     /**
      * VOICEPEAKコマンドラインの標準出力パブリッシャーを返す
      * <p>
-     *     {@link #start()}メソッドが実行されていなくても取得できる
+     * {@link #start()}メソッドが実行されていなくても取得できる
      * </p>
+     *
      * @return VOICEPEAKコマンドラインの標準出力パブリッシャー
      */
-    public Flow.Publisher<String> getStandardOut() {
-        return standardOut;
-    }
+    Flow.Publisher<String> getStandardOut();
 
     /**
      * VOICEPEAKコマンドラインのエラー出力パブリッシャーを返す
      * <p>
-     *     {@link #start()}メソッドが実行されていなくても取得できる
+     * {@link #start()}メソッドが実行されていなくても取得できる
      * </p>
+     *
      * @return VOICEPEAKコマンドラインのエラー出力パブリッシャー
      */
-    public Flow.Publisher<String> getErrorOut() {
-        return errorOut;
-    }
+    Flow.Publisher<String> getErrorOut();
+
 }

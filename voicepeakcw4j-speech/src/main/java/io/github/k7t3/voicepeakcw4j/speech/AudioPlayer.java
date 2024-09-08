@@ -21,7 +21,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -32,7 +32,10 @@ class AudioPlayer implements AutoCloseable {
 
     private static final System.Logger LOGGER = System.getLogger(AudioPlayer.class.getName());
 
-    private final ArrayBlockingQueue<Float> volumeQueue = new ArrayBlockingQueue<>(32);
+    private static final float VOLUME_MIN_RATE = 0.0001f;
+    private static final float VOLUME_MAX_RATE = 2.0f;
+
+    private final LinkedBlockingDeque<Float> volumeQueue = new LinkedBlockingDeque<>(32);
 
     private final AtomicBoolean cancelRequest = new AtomicBoolean(false);
 
@@ -57,8 +60,6 @@ class AudioPlayer implements AutoCloseable {
      * @param volumeRate ボリュームの比率
      */
     public void requestVolume(float volumeRate) {
-        if (volumeRate < 0.0f || 1.0f < volumeRate)
-            throw new IllegalArgumentException("volume rate is out of range.");
         volumeQueue.offer(volumeRate);
     }
 
@@ -67,6 +68,9 @@ class AudioPlayer implements AutoCloseable {
     }
 
     private void initialize() {
+        if (initialized) {
+            throw new IllegalStateException("already initialized");
+        }
         if (audioDevice == null) {
             LOGGER.log(System.Logger.Level.ERROR, "audio device can not play audio");
             close();
@@ -100,33 +104,44 @@ class AudioPlayer implements AutoCloseable {
     }
 
     private void setVolumeIfRequested(FloatControl volumeControl) {
-        if (volumeControl == null) return;
-
         var volumeRate = volumeQueue.poll();
         if (volumeRate == null) return;
 
+        setVolume(volumeControl, volumeRate);
+    }
+
+    private void setVolume(FloatControl volumeControl, float volumeRate) {
+        if (volumeControl == null) return;
+
         // logの0は不定なので下限を設ける
-        volumeRate = Math.clamp(volumeRate, volumeControl.getMinimum(), volumeControl.getMaximum());
+        volumeRate = Math.clamp(volumeRate, VOLUME_MIN_RATE, VOLUME_MAX_RATE);
 
         // 音圧のデシベルは10のべき乗ごとに20倍になるらしい
         // https://www.mgco.jp/magazine/plan/mame/b_others/2001/
         var decibel = (float) (20 * Math.log10(volumeRate));
 
         volumeControl.setValue(decibel);
-        LOGGER.log(System.Logger.Level.INFO, "set decibel " + decibel);
+        LOGGER.log(System.Logger.Level.DEBUG, "set decibel " + decibel);
     }
 
     public void play(Path audioFile) throws IOException, UnsupportedAudioFileException {
+        if (!initialized) {
+            initialize();
+        }
+
         if (closed) {
             LOGGER.log(System.Logger.Level.WARNING, "player is already closed");
             return;
         }
 
-        try (var input = AudioSystem.getAudioInputStream(new BufferedInputStream(Files.newInputStream(audioFile)))) {
+        var rate = volumeQueue.peekLast();
+        // キューされていれば最新のものを反映する
+        if (rate != null) {
+            volumeQueue.clear();
+            setVolume(volumeControl, rate);
+        }
 
-            if (!initialized) {
-                initialize();
-            }
+        try (var input = AudioSystem.getAudioInputStream(new BufferedInputStream(Files.newInputStream(audioFile)))) {
 
             // オーディオを読み込んでラインに書き込む
             var buffer = new byte[1024 * 4];
@@ -154,12 +169,16 @@ class AudioPlayer implements AutoCloseable {
 
     @Override
     public void close() {
-        if (!initialized || closed)
+        if (closed)
             return;
 
         closed = true;
-        line.drain();
-        line.close();
+
+        if (line != null) {
+            line.drain();
+            line.close();
+        }
+
         volumeControl = null;
         line = null;
     }

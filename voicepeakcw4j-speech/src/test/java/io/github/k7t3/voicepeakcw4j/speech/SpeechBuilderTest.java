@@ -16,6 +16,7 @@
 
 package io.github.k7t3.voicepeakcw4j.speech;
 
+import io.github.k7t3.voicepeakcw4j.VPClient;
 import io.github.k7t3.voicepeakcw4j.VPExecutable;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +39,8 @@ class SpeechBuilderTest {
 
     @BeforeEach
     void setUp() {
-        builder = new SpeechBuilder(executable);
+        VPClient client = VPClient.create(executable);
+        builder = new SpeechBuilder(client.builder());
     }
 
     private SpeechBuilder essentialBuilder() {
